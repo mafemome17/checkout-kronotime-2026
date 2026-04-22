@@ -1,19 +1,16 @@
-// app/routes/apps.kronotime/route.js
+// app/routes/apps.kronotime.jsx
+import { authenticate } from "../shopify.server";
 
-import { authenticate } from "../../shopify.server";
-
-export async function loader({ request }) {
-  // 🔥 App Proxy auth (igual que antes)
+export const loader = async ({ request }) => {
   const { admin } = await authenticate.public.appProxy(request);
 
   const url = new URL(request.url);
   const variantId = url.searchParams.get("variantId");
 
   if (!variantId) {
-    return new Response(
-      JSON.stringify({ error: "Missing variantId" }),
-      { status: 400 }
-    );
+    return new Response(JSON.stringify({ error: "Missing variantId" }), {
+      status: 400,
+    });
   }
 
   const response = await admin.graphql(`
@@ -37,6 +34,7 @@ export async function loader({ request }) {
 
   const json = await response.json();
 
+  // 🔥 limpiamos la respuesta
   const levels =
     json?.data?.productVariant?.inventoryItem?.inventoryLevels?.edges || [];
 
@@ -47,8 +45,6 @@ export async function loader({ request }) {
   }));
 
   return new Response(JSON.stringify(formatted), {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-}
+};

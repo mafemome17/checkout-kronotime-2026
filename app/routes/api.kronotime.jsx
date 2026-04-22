@@ -1,44 +1,50 @@
-// /api/kronotime.js
+// app/routes/apps.kronotime.jsx
+import { authenticate } from "../shopify.server";
 
-export default async function handler(req, res) {
-  // 🔥 CORS (necesario para extensión)
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://extensions.shopifycdn.com"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type"
-  );
+export const loader = async ({ request }) => {
+  const { admin } = await authenticate.admin(request);
 
-  // 🔥 preflight
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
-
-  const { variantId } = req.query;
+  const url = new URL(request.url);
+  const variantId = url.searchParams.get("variantId");
 
   if (!variantId) {
-    return res.status(400).json({ error: "Missing variantId" });
+    return new Response(JSON.stringify({ error: "Missing variantId" }), {
+      status: 400,
+    });
   }
 
-  try {
-    // ⚠️ aquí necesitas tu cliente de Shopify Admin API
-    // (esto depende de cómo tengas configurado shopify.server)
+  const response = await admin.graphql(`
+    query {
+      productVariant(id: "gid://shopify/ProductVariant/${variantId}") {
+        inventoryItem {
+          inventoryLevels(first: 10) {
+            edges {
+              node {
+                location { id name }
+                quantities(names: ["available"]) {
+                  quantity
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `);
 
-    // EJEMPLO SIMPLIFICADO:
-    const data = {
-      variantId,
-      message: "Funciona 🚀",
-    };
+  const json = await response.json();
 
-    return res.status(200).json(data);
+  // 🔥 limpiamos la respuesta
+  const levels =
+    json?.data?.productVariant?.inventoryItem?.inventoryLevels?.edges || [];
 
-  } catch (error) {
-    return res.status(500).json({ error: "Internal error" });
-  }
-}
+  const formatted = levels.map((edge) => ({
+    locationId: edge.node.location.id,
+    locationName: edge.node.location.name,
+    available: edge.node.quantities?.[0]?.quantity || 0,
+  }));
+
+  return new Response(JSON.stringify(formatted), {
+    headers: { "Content-Type": "application/json" },
+  });
+};
