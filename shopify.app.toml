@@ -2,7 +2,7 @@
 
 client_id = "c1e0a2c2c0ee900d9b73a59703fc4c2f"
 name = "checkout-kronotime-2026"
-application_url = "https://example.com"
+application_url = "https://checkout-kronotime-2026.vercel.app"
 embedded = true
 
 [build]
@@ -26,10 +26,12 @@ scopes = "write_metaobject_definitions,write_metaobjects,write_products,read_inv
 unauthenticated_scopes = "unauthenticated_read_product_pickup_locations"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = ["https://checkout-kronotime-2026.vercel.app/auth/callback", 
+"https://checkout-kronotime-2026.vercel.app/auth/shopify/callback", 
+"https://checkout-kronotime-2026.vercel.app/api/auth/callback"]
 
 [app_proxy]
-url = "https://indices-freeze-premiere-regime.trycloudflare.com"
+url = "https://checkout-kronotime-2026.vercel.app"
 subpath = "kronotime"
 prefix = "apps"
 
