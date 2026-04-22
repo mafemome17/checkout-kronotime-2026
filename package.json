@@ -2,7 +2,7 @@
   "name": "checkout-kronotime-2026",
   "private": true,
   "scripts": {
-    "build": "react-router build",
+    "build": "prisma generate && prisma migrate deploy && remix vite:build",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
@@ -12,10 +12,11 @@
     "start": "react-router-serve ./build/server/index.js",
     "docker-start": "npm run setup && npm run start",
     "setup": "prisma generate && prisma migrate deploy",
-    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
+    "postinstall": "prisma generate",
     "vite": "vite",
     "typecheck": "react-router typegen && tsc --noEmit"
   },
