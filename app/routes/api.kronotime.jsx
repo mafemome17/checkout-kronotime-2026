@@ -1,64 +1,44 @@
-// app/routes/api.kronotime.jsx
-import { json } from "@remix-run/node";
-import { authenticate } from "../shopify.server";
+// /api/kronotime.js
 
-export const loader = async ({ request }) => {
-  // 🔥 CAMBIO CLAVE: ya NO es appProxy
-  const { admin } = await authenticate.admin(request);
+export default async function handler(req, res) {
+  // 🔥 CORS (necesario para extensión)
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "https://extensions.shopifycdn.com"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type"
+  );
 
-  const url = new URL(request.url);
-  const variantId = url.searchParams.get("variantId");
-
-  if (!variantId) {
-    return json({ error: "Missing variantId" }, { status: 400 });
+  // 🔥 preflight
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
   }
 
-  const response = await admin.graphql(`
-    query {
-      productVariant(id: "gid://shopify/ProductVariant/${variantId}") {
-        inventoryItem {
-          inventoryLevels(first: 10) {
-            edges {
-              node {
-                location { id name }
-                quantities(names: ["available"]) {
-                  quantity
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `);
+  const { variantId } = req.query;
 
-  const jsonData = await response.json();
+  if (!variantId) {
+    return res.status(400).json({ error: "Missing variantId" });
+  }
 
-  const levels =
-    jsonData?.data?.productVariant?.inventoryItem?.inventoryLevels?.edges || [];
+  try {
+    // ⚠️ aquí necesitas tu cliente de Shopify Admin API
+    // (esto depende de cómo tengas configurado shopify.server)
 
-  const formatted = levels.map((edge) => ({
-    locationId: edge.node.location.id,
-    locationName: edge.node.location.name,
-    available: edge.node.quantities?.[0]?.quantity || 0,
-  }));
+    // EJEMPLO SIMPLIFICADO:
+    const data = {
+      variantId,
+      message: "Funciona 🚀",
+    };
 
-  return json(formatted, {
-    headers: {
-      // 🔥 necesario para la extensión
-      "Access-Control-Allow-Origin": "https://extensions.shopifycdn.com",
-    },
-  });
-};
+    return res.status(200).json(data);
 
-// 🔥 manejar preflight (MUY importante)
-export const action = async () => {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "https://extensions.shopifycdn.com",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
-};
+  } catch (error) {
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
