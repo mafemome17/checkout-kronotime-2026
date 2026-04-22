@@ -1,0 +1,8 @@
+{
+  "welcome": "Bienvenido a la extensión {{target}}",
+  "iWouldLikeAFreeGiftWithMyOrder": "Me gustaría recibir un regalo gratis con mi pedido",
+  "addAFreeGiftToMyOrder": "Agregar un regalo gratis a mi pedido",
+  "metafieldChangesAreNotSupported": "Los cambios en los metafields del carrito no están soportados en este checkout",
+  "companyRequired": "El número de identificación es obligatorio",
+  "returnProductFromCheckout": "Ir de nuevo al producto"
+}
