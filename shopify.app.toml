@@ -31,7 +31,7 @@ redirect_urls = ["https://checkout-kronotime-2026.vercel.app/auth/callback",
 "https://checkout-kronotime-2026.vercel.app/api/auth/callback"]
 
 [app_proxy]
-url = "https://checkout-kronotime-2026.vercel.app"
+url = "https://checkout-kronotime-2026.vercel.app/apps/proxy"
 subpath = "kronotime"
 prefix = "apps"
 

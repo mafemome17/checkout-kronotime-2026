@@ -36,10 +36,8 @@ function Extension() {
   useEffect(() => {
 
     const setup = async () => {
-      const url = new URL(`https://${shopDomain}/apps/kronotime`);
-      url.searchParams.set("variantId", "48521114484963");
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch("https://checkout-kronotime-2026.vercel.app/api/kronotime?variantId=48521114484963", {
         method: "GET",
         credentials: "include",
       });
