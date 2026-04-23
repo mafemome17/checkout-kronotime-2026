@@ -12,7 +12,7 @@ function Extension() {
 
   const shopDomain = shopify.shop.myshopifyDomain;
 
-  console.log("appUrl",shopDomain);
+  
 
   const getStoreAvailability = async () => {
      const { data: productData } = await shopify.query(`
@@ -35,10 +35,22 @@ function Extension() {
 
   useEffect(() => {
 
+    
+
     const fetchData = async () => {
+      const token = await shopify.sessionToken.get;
+
+      console.log("token", token);
+
       try {
         const response = await fetch(
-          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantId=48521114484963`
+          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantId=48521114484963`, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }
+          }
         );
 
         const data = await response.json();
