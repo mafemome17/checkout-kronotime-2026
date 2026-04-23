@@ -35,16 +35,21 @@ function Extension() {
 
   useEffect(() => {
 
-    const setup = async () => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantId=48521114484963`
+        );
 
-      const response = await fetch("https://checkout-kronotime-2026.vercel.app/api/kronotime?variantId=48521114484963", {
-        method: "GET",
-        credentials: "include",
-      });
-      const data = await response.json();
-      console.log("respuesta", data);
+        const data = await response.json();
+
+        console.log("respuesta:", data);
+      } catch (error) {
+        console.error("error:", error);
+      }
     };
-    setup();
+
+    fetchData();
 
 
   }, []);
