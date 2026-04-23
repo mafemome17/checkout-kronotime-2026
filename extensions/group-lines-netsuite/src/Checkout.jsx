@@ -30,14 +30,10 @@ function Extension() {
 
         const variantIds = getNumericVariantIds(shopify.lines.value);
 
-        const params = new URLSearchParams();
-
-        variantIds.forEach(id => params.append("ids", id))
-
-        console.log(params);
+        console.log(variantIds);
 
         const response = await fetch(
-          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?${params.toString()}`, {
+          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantIds=${JSON.stringify(variantIds)}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",

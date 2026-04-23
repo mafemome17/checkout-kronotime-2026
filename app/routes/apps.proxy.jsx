@@ -23,36 +23,28 @@ export const loader = async ({ request }) => {
     }
 
     const url = new URL(request.url);
-    console.log("aqui esta  mafe");
+    const variantIds = url.searchParams.get("variantIds");
 
-    const rawIds = url.searchParams.getAll("ids");
-
-    if (rawIds.length === 0) {
-      return new Response(JSON.stringify({ error: "No IDs provided" }), { status: 400 });
+    if (!variantIds) {
+      return new Response(JSON.stringify({ error: "Missing variantId" }), { status: 400 });
     }
-
-    const variantIdsArray = rawIds.map(id => 
-      id.startsWith("gid://") ? id : `gid://shopify/ProductVariant/${id}`
-    );
-
-    
 
     try {
       // 2. Ejecutar la query usando el cliente admin.graphql
       const response = await admin.graphql(`
-        query getBulkInventory($ids: [ID!]!) {
-          nodes(ids: $ids) {
-            ... on ProductVariant {
-              id
-              sku
-              product { title }
-              inventoryItem {
-                inventoryLevels(first: 10) {
-                  nodes {
-                    location { id name }
-                    quantities(names: ["available"]) { 
-                      name 
-                      quantity 
+        query getInventory($id: ID!) {
+          productVariant(id: $id) {
+            inventoryItem {
+              inventoryLevels(first: 10) {
+                edges {
+                  node {
+                    location {
+                      id
+                      name
+                    }
+                    quantities(names: ["available"]) {
+                      name
+                      quantity
                     }
                   }
                 }
@@ -60,8 +52,10 @@ export const loader = async ({ request }) => {
             }
           }
         }
-      `, { 
-        variables: { ids: variantIdsArray } 
+      `, {
+        variables: {
+          id: `gid://shopify/ProductVariant/${variantIds}`,
+        },
       });
 
       const responseJson = await response.json();
@@ -79,6 +73,21 @@ export const loader = async ({ request }) => {
       console.error("Error en GraphQL:", error);
       return new Response(JSON.stringify({ error: "Query failed" }), { status: 500 });
     }
+
+    // 2. Retornar datos con cabeceras CORS
+    const data = { shop: session.shop, success: true };
+
+
+
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*", // Permite que la extensión lea los datos
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      },
+    });
 
   } catch (error) {
     console.error("Error en autenticación:", error.message);
