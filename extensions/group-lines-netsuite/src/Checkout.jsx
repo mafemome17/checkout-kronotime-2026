@@ -10,44 +10,36 @@ export default async () => {
 
 function Extension() {
 
-  const shopDomain = shopify.shop.myshopifyDomain;
+  const getNumericVariantIds = (lineItems) => {
+    if (!Array.isArray(lineItems)) return [];
 
-  
-
-  const getStoreAvailability = async () => {
-     const { data: productData } = await shopify.query(`
-      {
-        product(handle: "the-collection-snowboard-hydrogen") {
-          id
-          title
-          variants (first: 10) {
-            nodes {
-              id
-              title
-              
-            }
-          }  
-        }
-      }
-    `);
-    console.log("product:", productData)
+    return lineItems
+      .map(line => {
+        const gid = line?.merchandise?.id;
+        // Dividimos por la barra "/" y nos quedamos con el último elemento
+        return gid ? gid.split('/').pop() : null;
+      })
+      .filter(Boolean); // Filtra nulos o errores
   };
 
   useEffect(() => {
 
-    
-
     const fetchData = async () => {
-      const token = await shopify.sessionToken.get;
-
-      console.log("token", token);
 
       try {
+
+        const variantIds = getNumericVariantIds(shopify.lines.value);
+
+        const params = new URLSearchParams();
+
+        variantIds.forEach(id => params.append("ids", id))
+
+        console.log(params);
+
         const response = await fetch(
-          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantId=48521114484963`, {
+          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?${params.toString()}`, {
             method: "GET",
             headers: {
-              "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json",
             }
           }
