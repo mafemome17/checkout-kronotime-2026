@@ -10,16 +10,18 @@ export default async () => {
 
 function Extension() {
 
-  const getNumericVariantIds = (lineItems) => {
-    if (!Array.isArray(lineItems)) return [];
+  const getNumericVariantIdsString = (lineItems) => {
+    if (!Array.isArray(lineItems)) return "";
 
-    return lineItems
+    const ids = lineItems
       .map(line => {
         const gid = line?.merchandise?.id;
-        // Dividimos por la barra "/" y nos quedamos con el último elemento
         return gid ? gid.split('/').pop() : null;
       })
-      .filter(Boolean); // Filtra nulos o errores
+      .filter(Boolean); // Mantiene solo IDs válidos
+
+    // .join(',') une los elementos del array con una coma
+    return ids.join(',');
   };
 
   useEffect(() => {
@@ -28,12 +30,12 @@ function Extension() {
 
       try {
 
-        const variantIds = getNumericVariantIds(shopify.lines.value);
+        const variantIds = getNumericVariantIdsString(shopify.lines.value);
 
-        console.log(variantIds);
+        console.log(JSON.stringify(variantIds));
 
         const response = await fetch(
-          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantIds=${JSON.stringify(variantIds)}`, {
+          `https://${shopify.shop.myshopifyDomain}/apps/kronotime?variantIds=${variantIds}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",

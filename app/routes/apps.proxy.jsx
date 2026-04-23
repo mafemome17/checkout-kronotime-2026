@@ -74,21 +74,6 @@ export const loader = async ({ request }) => {
       return new Response(JSON.stringify({ error: "Query failed" }), { status: 500 });
     }
 
-    // 2. Retornar datos con cabeceras CORS
-    const data = { shop: session.shop, success: true };
-
-
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*", // Permite que la extensión lea los datos
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
-
   } catch (error) {
     console.error("Error en autenticación:", error.message);
     throw new Response("Internal Server Error", { status: 500 });
